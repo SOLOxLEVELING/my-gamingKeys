@@ -15,6 +15,7 @@ import { CartProvider } from "./components/CartContext"; // Import CartProvider
 import ProductListPage from "./components/ProductListPage"; // Import the new page
 import PreOrderPage from "./components/PreOrderPage"; // Import new Pre-order page
 import ContactPage from "./components/ContactPage";
+import ProductDetailPage from "./components/ProductDetailPage";
 
 // --- Page Components ---
 
@@ -51,6 +52,11 @@ function App() {
                   path="/products/:category"
                   element={<ProductListPage />}
                 />
+                <Route
+                  path="/product/:productId"
+                  element={<ProductDetailPage />}
+                />{" "}
+                {/* ADD THIS LINE */}
               </Routes>
             </main>
           </div>

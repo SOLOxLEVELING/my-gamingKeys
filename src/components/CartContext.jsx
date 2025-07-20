@@ -28,7 +28,9 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, [user]);
 
-  const addToCart = async (product) => {
+  // ... (imports and other functions remain the same)
+
+  const addToCart = async (product, quantity, variantInfo) => {
     if (!user) {
       alert("Please log in to add items to your cart.");
       return;
@@ -40,13 +42,20 @@ export const CartProvider = ({ children }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
         },
-        body: JSON.stringify({ product }),
+        // Send product, quantity, and variantInfo in the body
+        body: JSON.stringify({ product, quantity, variantInfo }),
       });
+
       if (!response.ok) throw new Error("Failed to add item.");
+
       const updatedItem = await response.json();
+
+      // This logic will now correctly add new variants or update existing ones.
       setCart((prevCart) => {
         const existingItemIndex = prevCart.findIndex(
-          (p) => p.product_id === updatedItem.product_id
+          (p) =>
+            p.product_id === updatedItem.product_id &&
+            p.variant_info === updatedItem.variant_info
         );
         if (existingItemIndex > -1) {
           const newCart = [...prevCart];
@@ -56,10 +65,15 @@ export const CartProvider = ({ children }) => {
           return [...prevCart, updatedItem];
         }
       });
+      alert(`${product.name} added to cart!`); // Give user feedback
     } catch (error) {
-      console.error(error);
+      console.error("Error in addToCart:", error);
+      alert("There was an error adding the item to your cart.");
     }
   };
+
+  // Make sure to export the updated addToCart function in the provider value
+  // ...
 
   const removeFromCart = async (productId) => {
     if (!user) return;

@@ -110,17 +110,20 @@ app.get("/api/cart", authenticateToken, async (req, res) => {
 
 // POST /api/cart/add - Add item to cart (or update quantity)
 app.post("/api/cart/add", authenticateToken, async (req, res) => {
-  const { id: product_id, name, price, imageUrl: image_url } = req.body.product;
+  // Destructure product info and the new quantity + variant
+  const { product, quantity, variantInfo } = req.body;
+  const { id: product_id, name, price, imageUrl: image_url } = product;
   const user_id = req.user.id;
 
   try {
     const result = await pool.query(
-      `INSERT INTO cart_items (user_id, product_id, name, price, image_url, quantity)
-       VALUES ($1, $2, $3, $4, $5, 1)
-       ON CONFLICT (user_id, product_id)
-       DO UPDATE SET quantity = cart_items.quantity + 1
-       RETURNING *;`,
-      [user_id, product_id, name, price, image_url]
+      `INSERT INTO cart_items (user_id, product_id, name, price, image_url, quantity, variant_info)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (user_id, product_id, variant_info)
+         DO UPDATE SET quantity = cart_items.quantity + EXCLUDED.quantity
+         RETURNING *;`,
+      // Add quantity and variantInfo to the query
+      [user_id, product_id, name, price, image_url, quantity, variantInfo]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
