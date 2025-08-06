@@ -25,7 +25,7 @@ const ProductCard = ({ product }) => {
     // Wrap the entire card in a Link component
     <Link
       to={`/product/${product.id}`}
-      className="block bg-[#0a0a0a] border border-gray-800 rounded-lg overflow-hidden group transition-all duration-300 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/10 flex flex-col"
+      className="bg-[#0a0a0a] border border-gray-800 rounded-lg overflow-hidden group transition-all duration-300 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/10 flex flex-col"
     >
       <div className="overflow-hidden">
         <img
