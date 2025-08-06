@@ -29,6 +29,7 @@ const Navbar = () => {
   // UPDATED navItems paths
   const navItems = [
     { label: "Pre-order", path: "/pre-order" },
+    { label: "Home", path: "/" },
     { label: "Keyboard", path: "/products/keyboards" },
     { label: "Mouse", path: "/products/mice" },
     { label: "Deskmat", path: "/products/deskmats" },

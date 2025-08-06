@@ -8,7 +8,8 @@ const articles = [
     title: "Building the Perfect Typing Experience: A Deep Dive...",
     description:
       "There is something uniquely satisfying about building your own keyboard. In a time when most gadgets come ready-made and mass-produced, the ability to design a typing experience that is completely tailored to individual needs, from the sound each key makes to the feel of...",
-    imageUrl: "https://placehold.co/400x250/e0e0e0/000000?text=Keyboard",
+    imageUrl:
+      "https://mks.blr1.cdn.digitaloceanspaces.com/uploads/2021/12/Glorious-GMMK-PRO-75-Barebone-White-Main--jpg.webp",
     link: "#",
   },
   {
@@ -16,7 +17,8 @@ const articles = [
     title: "Choosing the Right Mouse for Pro-Level Gaming",
     description:
       "In the competitive world of esports, every millisecond counts. Your mouse is your primary weapon, and choosing the right one can make the difference between victory and defeat. We explore the key factors to consider, from sensor technology to ergonomics.",
-    imageUrl: "https://placehold.co/400x250/d1d5db/000000?text=Gaming+Mouse",
+    imageUrl:
+      "https://computerlounge.co.nz/cdn/shop/articles/Mouse-guide-main-banner_04a2a07f-5f4c-47c6-bf39-743af1d95075.jpg?v=1731962354&width=1600",
     link: "#",
   },
   {
@@ -24,7 +26,8 @@ const articles = [
     title: "The Art of the Deskmat: More Than Just a Surface",
     description:
       "A deskmat is the canvas for your workspace. It not only protects your desk but also adds a touch of personality and can significantly improve mouse tracking. Discover the different materials, sizes, and designs that can elevate your setup.",
-    imageUrl: "https://placehold.co/400x250/9ca3af/ffffff?text=Deskmat",
+    imageUrl:
+      "https://coveritup.com/cdn/shop/collections/deskmat-banner.jpg?v=1685698789&width=1600",
     link: "#",
   },
 ];
@@ -101,11 +104,11 @@ const ArticleSlider = () => {
                 </a>
               </div>
               {/* Image */}
-              <div className="md:w-1/2">
+              <div className="md:w-1/2 w-full h-64 md:h-auto aspect-video overflow-hidden rounded-lg shadow-lg">
                 <img
                   src={currentArticle.imageUrl}
                   alt={currentArticle.title}
-                  className="rounded-lg shadow-lg w-full h-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>

@@ -3,3 +3,22 @@
 body {
   @apply bg-black;
 }
+
+@layer utilities {
+  @keyframes slide-in-out {
+    0%,
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    10%,
+    90% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in-out {
+    animation: slide-in-out 3s ease-in-out forwards;
+  }
+}

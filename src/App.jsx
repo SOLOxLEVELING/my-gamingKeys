@@ -10,6 +10,7 @@ import ArticleSlider from "./components/ArticleSlider";
 import AccountPage from "./components/AccountPage";
 import CartPage from "./components/CartPage"; // Import CartPage
 import Footer from "./components/Footer";
+import { ToastProvider } from "./components/ToastContext";
 import { AuthProvider } from "./components/AuthContext"; // Import AuthProvider
 import { CartProvider } from "./components/CartContext"; // Import CartProvider
 import ProductListPage from "./components/ProductListPage"; // Import the new page
@@ -34,34 +35,37 @@ const Home = () => (
 
 function App() {
   return (
+    // Correct Provider Order:
+    // AuthProvider is at the top.
+    // ToastProvider is next, so CartProvider can use it.
+    // CartProvider is inside both, so it can access AuthContext and ToastContext.
     <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <div className="bg-black min-h-screen pt-20">
-            <Navbar />
-            <main>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/pre-order" element={<PreOrderPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/account" element={<AccountPage />} />
-                <Route path="/cart" element={<CartPage />} />{" "}
-                {/* Add cart route */}
-                {/* Add new product page route */}
-                <Route
-                  path="/products/:category"
-                  element={<ProductListPage />}
-                />
-                <Route
-                  path="/product/:productId"
-                  element={<ProductDetailPage />}
-                />{" "}
-                {/* ADD THIS LINE */}
-              </Routes>
-            </main>
-          </div>
-        </BrowserRouter>
-      </CartProvider>
+      <ToastProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <div className="bg-black min-h-screen pt-20">
+              <Navbar />
+              <main>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/pre-order" element={<PreOrderPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/account" element={<AccountPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route
+                    path="/products/:category"
+                    element={<ProductListPage />}
+                  />
+                  <Route
+                    path="/product/:productId"
+                    element={<ProductDetailPage />}
+                  />
+                </Routes>
+              </main>
+            </div>
+          </BrowserRouter>
+        </CartProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

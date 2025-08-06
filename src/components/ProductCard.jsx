@@ -2,18 +2,23 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom"; // Import Link
 import { Star } from "lucide-react";
 import { CartContext } from "./CartContext";
+import { useToast } from "./ToastContext"; // 1. Import useToast
 
 const ProductCard = ({ product }) => {
   const { name, rating, price } = product;
   const { addToCart } = useContext(CartContext);
+  const { showToast } = useToast(); // 2. Get the showToast function
 
   const handleQuickAddToCart = (e) => {
     e.preventDefault(); // Prevent navigation when clicking the button
     e.stopPropagation();
-    // Note: This adds the default product variant.
-    // A more complex implementation might open a modal to select variants.
-    addToCart(product);
-    alert(`${product.name} added to cart!`);
+
+    // Note: We are now passing all the required data for the API.
+    // 1. The product object.
+    // 2. The quantity (1 for a quick add).
+    // 3. Default variant information, as none is selected on the card.
+    // Call addToCart (which will now show its own toast)
+    addToCart(product, 1, "Default");
   };
 
   return (

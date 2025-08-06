@@ -1,11 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./AuthContext";
+import { useToast } from "./ToastContext"; // 1. Import useToast
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const { user } = useContext(AuthContext);
+  const { showToast } = useToast(); // 2. Get the showToast function
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -32,7 +34,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (product, quantity, variantInfo) => {
     if (!user) {
-      alert("Please log in to add items to your cart.");
+      showToast("Please log in to add items to your cart.", "error"); // Use toast for error
       return;
     }
     try {
@@ -65,10 +67,10 @@ export const CartProvider = ({ children }) => {
           return [...prevCart, updatedItem];
         }
       });
-      alert(`${product.name} added to cart!`); // Give user feedback
+      showToast(`${product.name} added to cart!`, "success"); // 3. Replace alert with success toast
     } catch (error) {
       console.error("Error in addToCart:", error);
-      alert("There was an error adding the item to your cart.");
+      showToast("Error adding item to cart.", "error"); // Use toast for error
     }
   };
 

@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
+import { useToast } from "./ToastContext"; // 1. Import useToast
 
 const FormInput = ({ id, type, label, value, onChange, placeholder }) => (
   <div>
@@ -41,6 +42,7 @@ const AccountPage = () => {
   });
 
   const { login } = useContext(AuthContext);
+  const { showToast } = useToast(); // 2. Get showToast
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -71,22 +73,22 @@ const AccountPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(`Error: ${data.message}`);
+        showToast(`Error: ${data.message}`, "error"); // 3. Replace alert
         return;
       }
 
       if (isLoginView) {
-        alert("Login successful!");
+        showToast("Login successful!", "success"); // 3. Replace alert
         login({ email: data.email, name: data.name, token: data.token });
         navigate("/");
       } else {
-        alert("Registration successful! Please log in.");
+        showToast("Registration successful! Please log in.", "success"); // 3. Replace alert
         setIsLoginView(true);
         setFormData({ name: "", email: "", password: "" });
       }
     } catch (error) {
       console.error("Network or server error:", error);
-      alert("Failed to connect to the server.");
+      showToast("Failed to connect to the server.", "error"); // 3. Replace alert
     }
   };
 
