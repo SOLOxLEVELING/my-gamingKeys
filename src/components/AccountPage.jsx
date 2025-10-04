@@ -51,46 +51,51 @@ const AccountPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const endpoint = isLoginView ? "login" : "register";
-    const url = `http://localhost:4000/api/${endpoint}`;
+  e.preventDefault();
+  const endpoint = isLoginView ? "login" : "register";
+  
+  // 1. Get the base URL from the environment variable
+  const apiUrl = import.meta.env.VITE_API_URL;
 
-    const body = isLoginView
-      ? { email: formData.email, password: formData.password }
-      : {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        };
+  // 2. Build the full URL using the variable
+  const url = `${apiUrl}/api/${endpoint}`;
 
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+  const body = isLoginView
+    ? { email: formData.email, password: formData.password }
+    : {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      };
 
-      const data = await response.json();
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-      if (!response.ok) {
-        showToast(`Error: ${data.message}`, "error"); // 3. Replace alert
-        return;
-      }
+    const data = await response.json();
 
-      if (isLoginView) {
-        showToast("Login successful!", "success"); // 3. Replace alert
-        login({ email: data.email, name: data.name, token: data.token });
-        navigate("/");
-      } else {
-        showToast("Registration successful! Please log in.", "success"); // 3. Replace alert
-        setIsLoginView(true);
-        setFormData({ name: "", email: "", password: "" });
-      }
-    } catch (error) {
-      console.error("Network or server error:", error);
-      showToast("Failed to connect to the server.", "error"); // 3. Replace alert
+    if (!response.ok) {
+      showToast(`Error: ${data.message}`, "error");
+      return;
     }
-  };
+
+    if (isLoginView) {
+      showToast("Login successful!", "success");
+      login({ email: data.email, name: data.name, token: data.token });
+      navigate("/");
+    } else {
+      showToast("Registration successful! Please log in.", "success");
+      setIsLoginView(true);
+      setFormData({ name: "", email: "", password: "" });
+    }
+  } catch (error) {
+    console.error("Network or server error:", error);
+    showToast("Failed to connect to the server.", "error");
+  }
+};
 
   const toggleView = () => {
     setIsLoginView(!isLoginView);
