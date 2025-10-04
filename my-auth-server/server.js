@@ -9,19 +9,31 @@ const jwt = require("jsonwebtoken");
 const { Pool } = require("pg"); // Import the pg Pool
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to only accept requests from your frontend
+// Added Vercel URL and local dev URL to .env file
+const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173'];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
+
 app.use(bodyParser.json());
 
-const postgresPass = process.env.POSTGRES_PASSWORD;
 const jwtPass = process.env.JWT_PASS;
 
-// PostgreSQL Connection Pool
+// PostgreSQL Connection Pool using a Connection String
+// Render will provide the DATABASE_URL environment variable
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "ecom",
-  password: postgresPass,
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const JWT_SECRET = jwtPass;
@@ -84,7 +96,6 @@ app.post("/api/login", async (req, res) => {
       JWT_SECRET,
       { expiresIn: "1h" }
     );
-    // **MODIFIED**: Send back name and email along with the token
     res.status(200).json({ token, name: user.name, email: user.email });
   } catch (error) {
     console.error(error);
@@ -110,7 +121,6 @@ app.get("/api/cart", authenticateToken, async (req, res) => {
 
 // POST /api/cart/add - Add item to cart (or update quantity)
 app.post("/api/cart/add", authenticateToken, async (req, res) => {
-  // Destructure product info and the new quantity + variant
   const { product, quantity, variantInfo } = req.body;
   const { id: product_id, name, price, imageUrl: image_url } = product;
   const user_id = req.user.id;
@@ -122,7 +132,6 @@ app.post("/api/cart/add", authenticateToken, async (req, res) => {
          ON CONFLICT (user_id, product_id, variant_info)
          DO UPDATE SET quantity = cart_items.quantity + EXCLUDED.quantity
          RETURNING *;`,
-      // Add quantity and variantInfo to the query
       [user_id, product_id, name, price, image_url, quantity, variantInfo]
     );
     res.status(201).json(result.rows[0]);
@@ -144,7 +153,7 @@ app.delete(
         "DELETE FROM cart_items WHERE user_id = $1 AND product_id = $2",
         [user_id, productId]
       );
-      res.status(204).send(); // No Content
+      res.status(204).send();
     } catch (error) {
       console.error("Error removing from cart:", error);
       res.status(500).json({ message: "Server error" });
@@ -158,7 +167,7 @@ app.delete("/api/cart/clear", authenticateToken, async (req, res) => {
     await pool.query("DELETE FROM cart_items WHERE user_id = $1", [
       req.user.id,
     ]);
-    res.status(204).send(); // No Content
+    res.status(204).send();
   } catch (error) {
     console.error("Error clearing cart:", error);
     res.status(500).json({ message: "Server error" });
@@ -170,15 +179,13 @@ app.put("/api/cart/update", authenticateToken, async (req, res) => {
   const { productId, quantity } = req.body;
   const user_id = req.user.id;
 
-  // Ensure quantity is a positive number
   if (quantity < 1) {
-    // If quantity is 0 or less, we should just remove the item
     try {
       await pool.query(
         "DELETE FROM cart_items WHERE user_id = $1 AND product_id = $2",
         [user_id, productId]
       );
-      return res.status(204).send(); // No Content, indicates success
+      return res.status(204).send();
     } catch (error) {
       console.error("Error removing item from cart:", error);
       return res.status(500).json({ message: "Server error" });
@@ -205,9 +212,10 @@ app.put("/api/cart/update", authenticateToken, async (req, res) => {
   }
 });
 
-const PORT = 4000;
+// Use the port provided by the environment or default to 4000
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
 
 // Graceful shutdown
