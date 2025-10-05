@@ -1,19 +1,23 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./AuthContext";
-import { useToast } from "./ToastContext"; // 1. Import useToast
+import { useToast } from "./ToastContext";
 
 export const CartContext = createContext();
+
+// Get the API URL from the environment variable
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const { user } = useContext(AuthContext);
-  const { showToast } = useToast(); // 2. Get the showToast function
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchCart = async () => {
       if (user && user.token) {
         try {
-          const response = await fetch("http://localhost:4000/api/cart", {
+          // Use the API_URL variable
+          const response = await fetch(`${API_URL}/api/cart`, {
             headers: { Authorization: `Bearer ${user.token}` },
           });
           if (!response.ok) throw new Error("Could not fetch cart");
@@ -30,21 +34,19 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, [user]);
 
-  // ... (imports and other functions remain the same)
-
   const addToCart = async (product, quantity, variantInfo) => {
     if (!user) {
-      showToast("Please log in to add items to your cart.", "error"); // Use toast for error
+      showToast("Please log in to add items to your cart.", "error");
       return;
     }
     try {
-      const response = await fetch("http://localhost:4000/api/cart/add", {
+      // Use the API_URL variable
+      const response = await fetch(`${API_URL}/api/cart/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
         },
-        // Send product, quantity, and variantInfo in the body
         body: JSON.stringify({ product, quantity, variantInfo }),
       });
 
@@ -52,7 +54,6 @@ export const CartProvider = ({ children }) => {
 
       const updatedItem = await response.json();
 
-      // This logic will now correctly add new variants or update existing ones.
       setCart((prevCart) => {
         const existingItemIndex = prevCart.findIndex(
           (p) =>
@@ -67,20 +68,18 @@ export const CartProvider = ({ children }) => {
           return [...prevCart, updatedItem];
         }
       });
-      showToast(`${product.name} added to cart!`, "success"); // 3. Replace alert with success toast
+      showToast(`${product.name} added to cart!`, "success");
     } catch (error) {
       console.error("Error in addToCart:", error);
-      showToast("Error adding item to cart.", "error"); // Use toast for error
+      showToast("Error adding item to cart.", "error");
     }
   };
-
-  // Make sure to export the updated addToCart function in the provider value
-  // ...
 
   const removeFromCart = async (productId) => {
     if (!user) return;
     try {
-      await fetch(`http://localhost:4000/api/cart/remove/${productId}`, {
+      // Use the API_URL variable
+      await fetch(`${API_URL}/api/cart/remove/${productId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${user.token}` },
       });
@@ -95,12 +94,11 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = async (productId, newQuantity) => {
     if (!user) return;
     try {
-      // If new quantity is 0 or less, the backend will handle removal
       if (newQuantity < 1) {
         return removeFromCart(productId);
       }
-
-      const response = await fetch("http://localhost:4000/api/cart/update", {
+      // Use the API_URL variable
+      const response = await fetch(`${API_URL}/api/cart/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -124,7 +122,8 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     if (!user) return;
     try {
-      await fetch("http://localhost:4000/api/cart/clear", {
+      // Use the API_URL variable
+      await fetch(`${API_URL}/api/cart/clear`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${user.token}` },
       });
