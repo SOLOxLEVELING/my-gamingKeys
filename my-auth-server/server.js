@@ -9,7 +9,22 @@ const jwt = require("jsonwebtoken");
 const { Pool } = require("pg"); // Import the pg Pool
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to only accept requests from your frontend
+// Add your Vercel URL and local dev URL to your .env file
+const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
 app.use(bodyParser.json());
 
 const jwtPass = process.env.JWT_PASS;
@@ -17,11 +32,10 @@ const jwtPass = process.env.JWT_PASS;
 // PostgreSQL Connection Pool using a Connection String
 // Render will provide the DATABASE_URL environment variable
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "ecom",
-  password: postgresPass,
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 const JWT_SECRET = jwtPass;
