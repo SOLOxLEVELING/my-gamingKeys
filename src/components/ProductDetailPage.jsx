@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
-import { products } from "../data/productDetails";
+import { allProducts } from "../data/allProducts";
 import { Star, Plus, Minus, Heart } from "lucide-react";
 import { CartContext } from "./CartContext";
+import { placeholderProductDetails } from "../data/placeholderDetails";
 
-// --- Sub-components for better organization ---
-
+// --- Sub-components (ProductGallery, ProductTabs) ---
+// These components are unchanged.
 const ProductGallery = ({ gallery, mainMedia, setMainMedia }) => (
   <div className="flex flex-col gap-4">
     <div className="aspect-video w-full rounded-lg overflow-hidden border border-gray-800">
@@ -137,58 +138,68 @@ const ProductTabs = ({ product }) => {
 // --- Main Page Component ---
 const ProductDetailPage = () => {
   const { productId } = useParams();
-  const product = products[productId];
+  const { addToCart } = useContext(CartContext);
 
-  const [mainMedia, setMainMedia] = useState(product.gallery[0]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [productId]);
+
+  // 2. FIND THE DYNAMIC PRODUCT FROM 'allProducts.js'
+  const numericProductId = parseInt(productId, 10);
+  const baseProduct = [
+    ...allProducts.keyboards,
+    ...allProducts.mice,
+    ...allProducts.deskmats,
+  ].find((p) => p.id === numericProductId);
+
+  // 3. INITIALIZE STATE
+  // All state now correctly references the imported placeholder object
+  const [mainMedia, setMainMedia] = useState(
+    placeholderProductDetails.gallery[0]
+  );
   const [selectedSwitch, setSelectedSwitch] = useState(
-    product.variants.switches[0]
+    placeholderProductDetails.variants.switches[0]
   );
   const [selectedColor, setSelectedColor] = useState(
-    product.variants.colors[0]
+    placeholderProductDetails.variants.colors[0]
   );
   const [quantity, setQuantity] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
 
-  const { addToCart } = useContext(CartContext);
-
+  // 4. COMBINE DYNAMIC PRICE + PLACEHOLDER MODIFIER
   useEffect(() => {
-    const basePrice = parseFloat(product.salePrice.replace(/[^0-9.-]+/g, ""));
-    const modifier = selectedSwitch.priceModifier;
-    setCurrentPrice(basePrice + modifier);
-  }, [selectedSwitch, product.salePrice]);
+    if (baseProduct) {
+      const basePrice = parseFloat(baseProduct.price.replace(/[^0-9.-]+/g, ""));
+      const modifier = selectedSwitch.priceModifier;
+      setCurrentPrice(basePrice + modifier);
+    }
+  }, [selectedSwitch, baseProduct]);
 
-  // ... (inside the ProductDetailPage component)
-
+  // 5. UPDATE 'handleAddToCart'
   const handleAddToCart = () => {
-    // This is the product object we'll add
     const productInfo = {
-      id: product.id,
-      name: product.name,
+      id: baseProduct.id,
+      name: baseProduct.name,
       price: `₹${currentPrice.toFixed(2)}`,
-      imageUrl: product.gallery.find((m) => m.type === "image")?.url,
+      imageUrl: baseProduct.imageUrl,
     };
-
-    // This is the specific variant information
     const variantInfo = `${selectedColor.name}, ${selectedSwitch.name}`;
-
-    // Pass the product, quantity, and variant info to the context function
     addToCart(productInfo, quantity, variantInfo);
   };
 
-  // ... (rest of the component)
-
-  if (!product) {
+  if (!baseProduct) {
     return (
       <div className="text-center py-20 text-white">Product not found.</div>
     );
   }
 
+  // 6. RENDER THE PAGE
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-white">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Column: Media Gallery */}
         <ProductGallery
-          gallery={product.gallery}
+          gallery={placeholderProductDetails.gallery}
           mainMedia={mainMedia}
           setMainMedia={setMainMedia}
         />
@@ -196,7 +207,7 @@ const ProductDetailPage = () => {
         {/* Right Column: Product Info */}
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            {product.name}
+            {baseProduct.name} {/* DYNAMIC */}
           </h1>
           <div className="flex items-center mt-2">
             <div className="flex items-center">
@@ -205,7 +216,7 @@ const ProductDetailPage = () => {
                   key={i}
                   size={18}
                   className={`${
-                    i < product.rating
+                    i < placeholderProductDetails.rating // PLACEHOLDER
                       ? "text-yellow-400 fill-yellow-400"
                       : "text-gray-600"
                   }`}
@@ -216,24 +227,27 @@ const ProductDetailPage = () => {
               href="#reviews"
               className="ml-3 text-sm font-medium text-cyan-400 hover:text-cyan-300"
             >
-              ({product.reviewsCount} reviews)
+              ({placeholderProductDetails.reviewsCount} reviews){" "}
+              {/* PLACEHOLDER */}
             </a>
           </div>
 
           <div className="mt-4">
             <span className="text-gray-500 line-through text-2xl">
-              {product.originalPrice}
+              {placeholderProductDetails.originalPrice} {/* PLACEHOLDER */}
             </span>
             <span className="text-4xl font-bold ml-2">
-              ₹{currentPrice.toFixed(2)}
+              ₹{currentPrice.toFixed(2)} {/* DYNAMIC + PLACEHOLDER */}
             </span>
             <span className="text-green-400 text-sm ml-2">(incl. GST)</span>
           </div>
 
-          <p className="text-sm text-gray-400 mt-2">{product.paymentInfo}</p>
+          <p className="text-sm text-gray-400 mt-2">
+            {placeholderProductDetails.paymentInfo} {/* PLACEHOLDER */}
+          </p>
 
           <ul className="mt-6 space-y-2 text-gray-300 list-disc list-inside">
-            {product.features.map((feature, i) => (
+            {placeholderProductDetails.features.map((feature, i) => (
               <li key={i}>{feature}</li>
             ))}
           </ul>
@@ -246,7 +260,7 @@ const ProductDetailPage = () => {
                 Color: <span className="font-normal">{selectedColor.name}</span>
               </h3>
               <div className="flex items-center gap-3 mt-2">
-                {product.variants.colors.map((color) => (
+                {placeholderProductDetails.variants.colors.map((color) => (
                   <button
                     key={color.id}
                     onClick={() => setSelectedColor(color)}
@@ -264,11 +278,11 @@ const ProductDetailPage = () => {
             {/* Switch Variants */}
             <div className="mt-6">
               <h3 className="text-lg font-medium">
-                Key Switches:{" "}
+                Varients:{" "}
                 <span className="font-normal">{selectedSwitch.name}</span>
               </h3>
               <div className="flex flex-wrap gap-3 mt-2">
-                {product.variants.switches.map((sw) => (
+                {placeholderProductDetails.variants.switches.map((sw) => (
                   <button
                     key={sw.id}
                     onClick={() => setSelectedSwitch(sw)}
@@ -330,7 +344,7 @@ const ProductDetailPage = () => {
       </div>
 
       {/* Tabs section */}
-      <ProductTabs product={product} />
+      <ProductTabs product={placeholderProductDetails} />
     </div>
   );
 };
