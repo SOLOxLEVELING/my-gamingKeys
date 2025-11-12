@@ -17,7 +17,7 @@ const NavItem = ({ to, children, onClick }) => (
   </li>
 );
 
-const Navbar = () => {
+const Navbar = ({ onSearchClick }) => { // Accept onSearchClick prop
   const { user, logout } = useContext(AuthContext);
   const { cart } = useContext(CartContext);
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const Navbar = () => {
   const closeMenu = () => setIsMenuOpen(false);
 
   const navItems = [
-    // { label: "Pre-order", path: "/pre-order" },
+    { label: "Pre-order", path: "/pre-order" },
     { label: "Home", path: "/" },
     { label: "Keyboard", path: "/products/keyboards" },
     { label: "Mouse", path: "/products/mice" },
@@ -41,7 +41,6 @@ const Navbar = () => {
   ];
 
   return (
-    // Increased z-index for the entire navbar to z-[100]
     <nav className="fixed top-0 w-full z-[100] px-4 sm:px-8 py-4 bg-black text-white">
       <div className="flex items-center justify-between">
         {/* Part 1: Logo (Left) */}
@@ -78,7 +77,10 @@ const Navbar = () => {
 
         {/* Part 3: Desktop Action Icons (Right) */}
         <div className="hidden lg:flex flex-1 items-center justify-end gap-6">
-          <button className="relative cursor-pointer group text-white p-1">
+          <button
+            onClick={onSearchClick} // Trigger search modal
+            className="relative cursor-pointer group text-white p-1"
+          >
             <Search />
           </button>
 
@@ -119,7 +121,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile & Tablet Menu Dropdown - Increased z-index to z-[110] */}
+      {/* Mobile & Tablet Menu Dropdown */}
       {isMenuOpen && (
         <div className="lg:hidden mt-4 bg-black absolute top-full left-0 w-full h-screen z-[110]">
           <ul className="flex flex-col items-center gap-6 pt-8">
@@ -130,7 +132,10 @@ const Navbar = () => {
             ))}
             <div className="flex flex-col items-center gap-6 mt-6 border-t border-gray-700 pt-8 w-full max-w-xs">
               <button
-                onClick={closeMenu}
+                onClick={() => {
+                  onSearchClick(); // Trigger search modal
+                  closeMenu();
+                }}
                 className="relative flex items-center gap-2 cursor-pointer group text-white px-2 py-1"
               >
                 <Search />
