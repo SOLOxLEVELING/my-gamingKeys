@@ -45,7 +45,7 @@ const Carousel = () => {
   }, [nextSlide]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto h-[500px] relative group">
+    <div className="w-full max-w-7xl mx-auto h-[250px] md:h-[500px] relative group">
       {/* Slides Container */}
       <div className="relative h-full rounded-2xl overflow-hidden">
         <div

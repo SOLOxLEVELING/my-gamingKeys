@@ -6,9 +6,47 @@ import { CartContext } from "./CartContext";
 import { placeholderProductDetails } from "../data/placeholderDetails";
 
 // --- Sub-components (ProductGallery, ProductTabs) ---
-// These components are unchanged.
 const ProductGallery = ({ gallery, mainMedia, setMainMedia }) => (
-  <div className="flex flex-col gap-4">
+  <div className="flex flex-col md:flex-row gap-4">
+    {/* Thumbnails for Mobile (Vertical) */}
+    <div className="md:hidden flex flex-row gap-2 overflow-x-auto pb-2">
+      {gallery.map((media) => (
+        <button
+          key={media.id}
+          onClick={() => setMainMedia(media)}
+          className={`flex-shrink-0 w-20 h-16 rounded-md overflow-hidden border-2 transition-all ${
+            mainMedia.id === media.id ? "border-cyan-400" : "border-transparent"
+          }`}
+        >
+          <img
+            src={media.thumb}
+            alt="Product thumbnail"
+            className="w-full h-full object-cover"
+          />
+        </button>
+      ))}
+    </div>
+
+    {/* Thumbnails for Desktop (Vertical) */}
+    <div className="hidden md:flex flex-col gap-2">
+      {gallery.map((media) => (
+        <button
+          key={media.id}
+          onClick={() => setMainMedia(media)}
+          className={`w-20 h-16 rounded-md overflow-hidden border-2 transition-all ${
+            mainMedia.id === media.id ? "border-cyan-400" : "border-transparent"
+          }`}
+        >
+          <img
+            src={media.thumb}
+            alt="Product thumbnail"
+            className="w-full h-full object-cover"
+          />
+        </button>
+      ))}
+    </div>
+
+    {/* Main Media Display */}
     <div className="aspect-video w-full rounded-lg overflow-hidden border border-gray-800">
       {mainMedia.type === "video" ? (
         <iframe
@@ -26,23 +64,6 @@ const ProductGallery = ({ gallery, mainMedia, setMainMedia }) => (
         />
       )}
     </div>
-    <div className="flex gap-2 justify-center">
-      {gallery.map((media) => (
-        <button
-          key={media.id}
-          onClick={() => setMainMedia(media)}
-          className={`w-20 h-16 rounded-md overflow-hidden border-2 transition-all ${
-            mainMedia.id === media.id ? "border-cyan-400" : "border-transparent"
-          }`}
-        >
-          <img
-            src={media.thumb}
-            alt="Product thumbnail"
-            className="w-full h-full object-cover"
-          />
-        </button>
-      ))}
-    </div>
   </div>
 );
 
@@ -50,11 +71,11 @@ const ProductTabs = ({ product }) => {
   const [activeTab, setActiveTab] = useState("description");
   return (
     <div className="w-full mt-16">
-      <div className="border-b border-gray-700">
-        <nav className="flex gap-8">
+      <div className="border-b border-gray-700 overflow-x-auto">
+        <nav className="flex gap-4 sm:gap-8">
           <button
             onClick={() => setActiveTab("description")}
-            className={`py-4 px-1 text-lg font-medium ${
+            className={`py-4 px-1 text-base sm:text-lg font-medium whitespace-nowrap ${
               activeTab === "description"
                 ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-gray-400 hover:text-white"
@@ -64,7 +85,7 @@ const ProductTabs = ({ product }) => {
           </button>
           <button
             onClick={() => setActiveTab("details")}
-            className={`py-4 px-1 text-lg font-medium ${
+            className={`py-4 px-1 text-base sm:text-lg font-medium whitespace-nowrap ${
               activeTab === "details"
                 ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-gray-400 hover:text-white"
@@ -74,7 +95,7 @@ const ProductTabs = ({ product }) => {
           </button>
           <button
             onClick={() => setActiveTab("reviews")}
-            className={`py-4 px-1 text-lg font-medium ${
+            className={`py-4 px-1 text-base sm:text-lg font-medium whitespace-nowrap ${
               activeTab === "reviews"
                 ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-gray-400 hover:text-white"
@@ -99,7 +120,7 @@ const ProductTabs = ({ product }) => {
                 className="flex justify-between border-b border-gray-800 py-2"
               >
                 <span className="text-gray-400">{detail.label}</span>
-                <span>{detail.value}</span>
+                <span className="text-right">{detail.value}</span>
               </div>
             ))}
           </div>
@@ -144,7 +165,6 @@ const ProductDetailPage = () => {
     window.scrollTo(0, 0);
   }, [productId]);
 
-  // 2. FIND THE DYNAMIC PRODUCT FROM 'allProducts.js'
   const numericProductId = parseInt(productId, 10);
   const baseProduct = [
     ...allProducts.keyboards,
@@ -152,8 +172,6 @@ const ProductDetailPage = () => {
     ...allProducts.deskmats,
   ].find((p) => p.id === numericProductId);
 
-  // 3. INITIALIZE STATE
-  // All state now correctly references the imported placeholder object
   const [mainMedia, setMainMedia] = useState(
     placeholderProductDetails.gallery[0]
   );
@@ -166,7 +184,6 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
 
-  // 4. COMBINE DYNAMIC PRICE + PLACEHOLDER MODIFIER
   useEffect(() => {
     if (baseProduct) {
       const basePrice = parseFloat(baseProduct.price.replace(/[^0-9.-]+/g, ""));
@@ -175,7 +192,6 @@ const ProductDetailPage = () => {
     }
   }, [selectedSwitch, baseProduct]);
 
-  // 5. UPDATE 'handleAddToCart'
   const handleAddToCart = () => {
     const productInfo = {
       id: baseProduct.id,
@@ -193,21 +209,18 @@ const ProductDetailPage = () => {
     );
   }
 
-  // 6. RENDER THE PAGE
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-white">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Left Column: Media Gallery */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         <ProductGallery
           gallery={placeholderProductDetails.gallery}
           mainMedia={mainMedia}
           setMainMedia={setMainMedia}
         />
 
-        {/* Right Column: Product Info */}
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            {baseProduct.name} {/* DYNAMIC */}
+            {baseProduct.name}
           </h1>
           <div className="flex items-center mt-2">
             <div className="flex items-center">
@@ -216,7 +229,7 @@ const ProductDetailPage = () => {
                   key={i}
                   size={18}
                   className={`${
-                    i < placeholderProductDetails.rating // PLACEHOLDER
+                    i < placeholderProductDetails.rating
                       ? "text-yellow-400 fill-yellow-400"
                       : "text-gray-600"
                   }`}
@@ -227,23 +240,22 @@ const ProductDetailPage = () => {
               href="#reviews"
               className="ml-3 text-sm font-medium text-cyan-400 hover:text-cyan-300"
             >
-              ({placeholderProductDetails.reviewsCount} reviews){" "}
-              {/* PLACEHOLDER */}
+              ({placeholderProductDetails.reviewsCount} reviews)
             </a>
           </div>
 
           <div className="mt-4">
             <span className="text-gray-500 line-through text-2xl">
-              {placeholderProductDetails.originalPrice} {/* PLACEHOLDER */}
+              {placeholderProductDetails.originalPrice}
             </span>
             <span className="text-4xl font-bold ml-2">
-              ₹{currentPrice.toFixed(2)} {/* DYNAMIC + PLACEHOLDER */}
+              ₹{currentPrice.toFixed(2)}
             </span>
             <span className="text-green-400 text-sm ml-2">(incl. GST)</span>
           </div>
 
           <p className="text-sm text-gray-400 mt-2">
-            {placeholderProductDetails.paymentInfo} {/* PLACEHOLDER */}
+            {placeholderProductDetails.paymentInfo}
           </p>
 
           <ul className="mt-6 space-y-2 text-gray-300 list-disc list-inside">
@@ -252,9 +264,7 @@ const ProductDetailPage = () => {
             ))}
           </ul>
 
-          {/* Variants Selection */}
           <div className="mt-8">
-            {/* Color Variants */}
             <div>
               <h3 className="text-lg font-medium">
                 Color: <span className="font-normal">{selectedColor.name}</span>
@@ -275,7 +285,6 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* Switch Variants */}
             <div className="mt-6">
               <h3 className="text-lg font-medium">
                 Varients:{" "}
@@ -311,7 +320,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
 
-          {/* Add to Cart */}
           <div className="mt-8 flex items-center gap-4">
             <div className="flex items-center border border-gray-700 rounded-md">
               <button
@@ -343,7 +351,6 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      {/* Tabs section */}
       <ProductTabs product={placeholderProductDetails} />
     </div>
   );

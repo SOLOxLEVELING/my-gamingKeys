@@ -47,7 +47,8 @@ function App() {
         <CartProvider>
           <BrowserRouter>
             {/* Use flex-col and min-h-screen to make sure footer stays at the bottom */}
-            <div className="bg-black min-h-screen flex flex-col pt-20">
+            {/* Added overflow-hidden to prevent horizontal scroll */}
+            <div className="bg-black min-h-screen flex flex-col pt-20 overflow-hidden">
               <Navbar />
               {/* flex-grow allows the main content to push the footer down */}
               <main className="flex-grow">
